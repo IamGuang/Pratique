@@ -1,0 +1,1 @@
+D:\xampp\php\php.exe D:\xampp\htdocs\dailyjob\cron.php
