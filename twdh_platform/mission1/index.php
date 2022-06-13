@@ -6,6 +6,7 @@
     <form action="index.php" method="get">
         <span>關鍵字:</span> 
         <input type="text" name="關鍵字">
+        <input type="checkbox" name="使用全文檢索[]" value="是" checked>使用全文檢索
         <input type="submit">
     </form>
 
@@ -19,15 +20,26 @@
 
     $column_series = array();
     $sql = "";
-    if(array_key_exists("關鍵字", $_GET))
+    $_SESSION['startTime'] = microtime(true);
+
+    if(array_key_exists("關鍵字", $_GET) && $_GET["關鍵字"]!="" && array_key_exists("使用全文檢索", $_GET)){
+        $sql = "SELECT 來源系統, COUNT(id) AS 數量 
+        FROM `metadata2`
+        WHERE MATCH(全文檢索) AGAINST('\"".join(" ", mb_str_split($_GET["關鍵字"]))."\"')
+        GROUP BY `來源系統`;";
+    }
+    else if(array_key_exists("關鍵字", $_GET) && $_GET["關鍵字"]!=""){
         $sql = "SELECT 來源系統, COUNT(id) AS 數量 
         FROM `metadata2`
         WHERE 摘要 like '%".$_GET["關鍵字"]."%' OR 題名 like '%".$_GET["關鍵字"]."%'
         GROUP BY `來源系統`;";
-    else
-        $sql = "SELECT 來源系統, COUNT(id) AS 數量 FROM `metadata2` group by `來源系統`;";
+    }
+    else{
+        $sql = "SELECT 來源系統, COUNT(id) AS 數量 FROM `metadata2` GROUP BY `來源系統`;";
+    }
 
     $result = $conn->query($sql);
+
     if ($result->num_rows > 0) {
         while ($row = $result->fetch_assoc()) {
             array_push($column_series, [
@@ -38,6 +50,11 @@
         }
     }
     $conn->close();
+    
+    echo $sql . "<br>";
+    if ($_SESSION['startTime']){ 
+        echo "搜尋花了: " . $difference = microtime(true) - $_SESSION['startTime'] . " 毫秒";
+    } 
     ?>
 
 <div id="container" style="height: 500px; height:500px;"></div>
