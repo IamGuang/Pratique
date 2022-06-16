@@ -154,8 +154,17 @@ $conn->real_escape_string($題名)
 ```
 並將欄位設為 FULLTEXT
 ```sql
+\xampp\mysql\bin\my.ini
+[mysqld]
+ft_min_word_len = 1 
+```
+
+
+```sql
 ALTER TABLE   metadata2 ADD FULLTEXT(`全文檢索`)
 ```
+
+
 
 使用Highcahrt繪製長條圖
 
